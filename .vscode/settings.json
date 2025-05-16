@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "user_api.h": "c",
+        "types.h": "c",
+        "elf.h": "c",
+        "os.h": "c",
+        "string.h": "c",
+        "riscv.h": "c"
+    }
+}

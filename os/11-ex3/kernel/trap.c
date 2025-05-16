@@ -1,5 +1,5 @@
 #include "os.h"
-
+#include "riscv.h"
 extern void trap_vector(void);
 extern void uart_isr(void);
 extern void timer_handler(void);
@@ -96,3 +96,22 @@ void trap_test()
 	uart_puts("Yeah! I'm return back from trap!\n");
 }
 
+void enter_user_mode(uint64_t entry) {
+    // 用户栈地址
+    uint64_t user_sp = 0x80400000; // 自定义的用户栈位置
+
+    // 设置下一条指令为 entry
+    write_csr(sepc, entry);
+
+    // 设置用户栈
+    asm volatile("mv sp, %0" : : "r"(user_sp));
+
+    // 设置 sstatus: SPP=0（下一次 sret 切换到 U-mode）
+    uint64_t sstatus = read_csr(sstatus);
+    sstatus &= ~SSTATUS_SPP;       // 清除 SPP（进入用户模式）
+    sstatus |= SSTATUS_SPIE;       // 开中断
+    write_csr(sstatus, sstatus);
+
+    // sret 从 S 模式切到 U 模式
+    asm volatile("sret");
+}

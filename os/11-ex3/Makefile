@@ -1,4 +1,6 @@
 SYSCALL = y
+K=kernel
+U=user
 
 SRCS_ASM = \
 	start.S \
@@ -19,12 +21,12 @@ SRCS_C = \
 	lock.c \
 	syscall.c
 
-include /mnt/d/os/ex/riscv-operating-system-mooc/code/os/11-syscall/common.mk
+include /mnt/d/os/ex/riscv-operating-system-mooc/code/os/11-ex3/common.mk
 
 # 生成 user/usys.S 的规则
-usys.S: usys.pl syscall.h
-	perl usys.pl > usys.S
+$U/usys.S: $U/usys.pl $K/syscall.h
+	perl $U/usys.pl > $U/usys.S
 
 # 确保 user/usys.S 被编译为 user/usys.o
-usys.o: usys.S
+usys.o: $U/usys.S
 	$(CC) $(CFLAGS) -c -o $@ $<

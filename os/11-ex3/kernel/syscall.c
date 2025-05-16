@@ -137,24 +137,18 @@ int sys_MyPrintf(const char* s, ...)
 	return res;
 }
 
-int sys_MyAdd(unsigned int *a,unsigned int *b){
-	return *a + *b;
-
-}
-
 void do_syscall(struct context *cxt)
 {
+	printf(">>> do_syscall: a7 = %d\n", cxt->a7);
 	uint32_t syscall_num = cxt->a7;
- 
+
 	switch (syscall_num) {
 	case SYS_gethid:
 		cxt->a0 = sys_gethid((unsigned int *)(cxt->a0));
 		break;
 	case SYS_MyPrintf:
+	    // printf("Syscall MyPrintf: a0 = 0x%x\n", cxt->a0); 
 		cxt->a0 = sys_MyPrintf((const char* )(cxt->a0));
-		break;
-	case SYS_MyAdd:
-		cxt->a0 = sys_MyAdd((unsigned int *)(cxt->a0), (unsigned int *)(cxt->a1));
 		break;
 	default:
 		printf("Unknown syscall no: %d\n", syscall_num);

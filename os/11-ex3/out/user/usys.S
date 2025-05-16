@@ -10,8 +10,3 @@ gethid:
  li a7, SYS_gethid
  ecall
  ret
-.global MyAdd
-MyAdd:
- li a7, SYS_MyAdd
- ecall
- ret

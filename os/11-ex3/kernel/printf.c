@@ -1,16 +1,8 @@
 #include "os.h"
-#include "syscall.h"
 
-int sys_gethid(unsigned int *ptr_hid)
-{
-	printf("--> sys_gethid, arg0 = %p\n", ptr_hid);
-	if (ptr_hid == NULL) {
-		return -1;
-	} else {
-		*ptr_hid = r_mhartid();
-		return 0;
-	}
-}
+/*
+ * ref: https://github.com/cccriscv/mini-riscv-os/blob/master/05-Preemptive/lib.c
+ */
 
 static int _vsnprintf(char * out, size_t n, const char* s, va_list vl)
 {
@@ -127,7 +119,7 @@ static int _vprintf(const char* s, va_list vl)
 	return res;
 }
 
-int sys_MyPrintf(const char* s, ...)
+int printf(const char* s, ...)
 {
 	int res = 0;
 	va_list vl;
@@ -137,29 +129,10 @@ int sys_MyPrintf(const char* s, ...)
 	return res;
 }
 
-int sys_MyAdd(unsigned int *a,unsigned int *b){
-	return *a + *b;
-
-}
-
-void do_syscall(struct context *cxt)
+void panic(char *s)
 {
-	uint32_t syscall_num = cxt->a7;
- 
-	switch (syscall_num) {
-	case SYS_gethid:
-		cxt->a0 = sys_gethid((unsigned int *)(cxt->a0));
-		break;
-	case SYS_MyPrintf:
-		cxt->a0 = sys_MyPrintf((const char* )(cxt->a0));
-		break;
-	case SYS_MyAdd:
-		cxt->a0 = sys_MyAdd((unsigned int *)(cxt->a0), (unsigned int *)(cxt->a1));
-		break;
-	default:
-		printf("Unknown syscall no: %d\n", syscall_num);
-		cxt->a0 = -1;
-	}
-
-	return;
+	printf("panic: ");
+	printf(s);
+	printf("\n");
+	while(1){};
 }

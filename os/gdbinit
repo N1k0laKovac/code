@@ -1,4 +1,4 @@
-set disassemble-next-line on
+target remote :1234
+# 设置入口断点
 b _start
-target remote : 1234
 c

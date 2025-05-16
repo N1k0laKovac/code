@@ -5,8 +5,6 @@
 /* user mode syscall APIs */
 extern int gethid(unsigned int *hid);
 extern int MyPrintf(const char *fmt, ...);
-extern int MyAdd(unsigned int *a,unsigned int *b);
-
 
 // // 定义弱符号，若用户未实现则默认跳转至系统调用
 // int __attribute__((weak)) MyPrintf(const char *fmt, ...) {
