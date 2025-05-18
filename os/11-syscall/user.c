@@ -63,11 +63,11 @@ void test(void){
 	MyPrintf(fmt);
 }
 void testAdd(void){
-	char buf[2];  // ´æ·Å "3" + '\0'
-    buf[0] = '3';  // Ö±½Ó¸³Öµ×Ö·û '3'
-    buf[1] = '\0'; // ×Ö·û´®½áÊø·û
+	char buf[2];  // å­˜æ”¾ "3" + '\0'
+    buf[0] = '3';  // ç›´æ¥èµ‹å€¼å­—ç¬¦ '3'
+    buf[1] = '\0'; // å­—ç¬¦ä¸²ç»“æŸç¬¦
 	
-    MyPrintf(buf);  // ´òÓ¡ "3"
+    MyPrintf(buf);  // æ‰“å° "3"
 
 	// MyPrintf((char*) 3);
 	while (1) {
@@ -78,11 +78,11 @@ void testAdd(void){
 /* NOTICE: DON'T LOOP INFINITELY IN main() */
 void os_main(void)
 {
-	// MyPrintf("qq");
-	task_create(testAdd);
-	// task_create(call_MyPrintf);
-	// task_create(test);
-	// task_create(user_task0);
-	// task_create(user_task1);
+	// // MyPrintf("qq");
+	// task_create(testAdd);
+	// // task_create(call_MyPrintf);
+	// // task_create(test);
+	task_create(user_task0);
+	task_create(user_task1);
 }
 

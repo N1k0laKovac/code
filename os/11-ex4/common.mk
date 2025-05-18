@@ -59,49 +59,65 @@ $(OUTPUT_PATH)/%.o: $(KERNEL_DIR)/%.S
 USER_CFLAGS  = $(CFLAGS) -Iuser -fno-pic -mno-relax
 USER_LDFLAGS = -T user/user.ld -nostdlib -march=rv32g -mabi=ilp32
 
+USER_PROGRAMS := user1 user2  # 定义要编译的用户程序列表
+USER_ELF_OBJS := $(foreach prog,$(USER_PROGRAMS),$(OUTPUT_PATH)/$(prog)_elf.o)  # 修改点1：更新为多用户ELF对象
+
 USER_DIR     = user
 USER_ASMS    = $(USER_DIR)/user_start.S $(filter-out $(USER_DIR)/user_start.S,$(wildcard $(USER_DIR)/*.S))
 USER_SRCS    = $(wildcard $(USER_DIR)/*.c)
-USER_OBJS    = \
-   $(patsubst $(USER_DIR)/%.c,$(USER_OUTPUT)/%.o,$(USER_SRCS)) \
-   $(patsubst $(USER_DIR)/%.S,$(USER_OUTPUT)/%.o,$(USER_ASMS))
-USER_ELF     = $(USER_OUTPUT)/user.elf
-USER_BIN     = $(USER_OUTPUT)/user.bin
 
-# 生成 usys.S
+# ====================== 修改点2：将通用规则移到宏外部 ======================
+# 编译用户程序的C文件（通用规则，所有用户程序共享）
+$(USER_OUTPUT)/%.o: $(USER_DIR)/%.c
+	$(CC) $(DEFS) $(USER_CFLAGS) -c -o $@ $<
+
+# 编译用户程序的汇编文件（通用规则，所有用户程序共享）
+$(USER_OUTPUT)/%.o: $(USER_DIR)/%.S
+	$(CC) $(DEFS) $(USER_CFLAGS) -c -o $@ $<
+
+# 生成usys.S（通用规则）
 $(USER_OUTPUT)/usys.S: $(USER_DIR)/usys.pl
 	@$(MKDIR) $(@D)
 	perl $< > $@
 
-# 编译 usys.S
+# 编译usys.o（通用规则）
 $(USER_OUTPUT)/usys.o: $(USER_OUTPUT)/usys.S
 	$(CC) $(DEFS) $(USER_CFLAGS) -c -o $@ $<
 
-# 编译 C 源文件
-$(USER_OUTPUT)/%.o: $(USER_DIR)/%.c
-	$(CC) $(DEFS) $(USER_CFLAGS) -c -o $@ $<
 
-# 编译汇编源文件
-$(USER_OUTPUT)/%.o: $(USER_DIR)/%.S
-	$(CC) $(DEFS) $(USER_CFLAGS) -c -o $@ $<
 
-# 生成 user.elf（只生成 ELF，不生成 bin）
-$(USER_ELF): $(USER_OBJS) $(USER_OUTPUT)/usys.o
-	$(CC) $(USER_CFLAGS) $(USER_LDFLAGS) -o $@ $^
+d ====================== 修改点3：调整BUILD_USER_PROGRAM宏 ======================
+define BUILD_USER_PROGRAM
+$(1)_SRCS := user/$(1).c user/user_start.S  # 明确指定用户程序源文件
+$(1)_OBJS := $$(patsubst $(USER_DIR)/%.c, $(USER_OUTPUT)/%.o, $$(filter %.c, $$($(1)_SRCS))) \
+              $$(patsubst $(USER_DIR)/%.S, $(USER_OUTPUT)/%.o, $$(filter %.S, $$($(1)_SRCS)))
+$(1)_ELF := $(USER_OUTPUT)/$(1).elf
+$(1)_BIN := $(USER_OUTPUT)/$(1).bin
 
-# 显式从 user.elf 生成 user.bin
-$(USER_BIN): $(USER_ELF)
-	$(OBJCOPY) -O binary $< $@
+# 编译用户程序ELF
+$$($(1)_ELF): $$($(1)_OBJS) $(USER_OUTPUT)/usys.o
+	$(CC) $(USER_CFLAGS) $(USER_LDFLAGS) -Wl,--defsym=main=$(1)_main -o $$@ $$^
 
-# 显式从 user.bin 生成 ELF 对象 user_elf.o，嵌入到内核中
-$(USER_ELF_OBJ): $(USER_ELF)
+# 生成用户程序BIN
+$$($(1)_BIN): $$($(1)_ELF)
+	$(OBJCOPY) -O binary $$< $$@
+
+# 生成内核可链接的ELF对象
+$(OUTPUT_PATH)/$(1)_elf.o: $$($(1)_BIN)
 	$(OBJCOPY) \
-	-I binary \
-	-O elf32-littleriscv \
-	-B riscv \
-	--rename-section .data=.user_elf \
-	$< \
-	$@
+	  -I binary \
+	  -O elf32-littleriscv \
+	  -B riscv \
+	  --rename-section .data=.user_elf_$(1) \
+	  $$< \
+	  $$@
+
+# 添加依赖
+all: $$($(1)_ELF)
+endef
+
+# 生成所有用户程序的规则
+$(foreach prog,$(USER_PROGRAMS),$(eval $(call BUILD_USER_PROGRAM,$(prog))))
 
 # ====================== 运行与调试 ======================
 .DEFAULT_GOAL := all
@@ -135,4 +151,4 @@ code: all
 
 # ====================== 清理 ======================
 clean:
-	@$(RM) $(OUTPUT_PATH)
+	@$(RM) $(OUTPUT_PATH)/user/*   # 仅删除目录内容

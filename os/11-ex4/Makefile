@@ -19,9 +19,11 @@ SRCS_C = \
 	plic.c \
 	timer.c \
 	lock.c \
-	syscall.c
+	syscall.c \
+	exit.c \
+	printf \
 
-include /mnt/d/os/ex/riscv-operating-system-mooc/code/os/11-ex3/common.mk
+include /mnt/d/os/ex/riscv-operating-system-mooc/code/os/11-ex4/common.mk
 
 # 生成 user/usys.S 的规则
 $U/usys.S: $U/usys.pl $K/syscall.h

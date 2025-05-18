@@ -19,7 +19,7 @@ SECTIONS
 {
 	
 	.text : {
-        *(.text.entry)  # ????????
+        *(.text.entry)  /* 汇编入口_start */
         *(.text .text.*)
     } > user_ram
 
