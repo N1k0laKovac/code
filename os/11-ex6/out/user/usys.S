@@ -35,3 +35,18 @@ get_tick:
  li a7, 7
  ecall
  ret
+.global fs_create
+fs_create:
+ li a7, 8
+ ecall
+ ret
+.global cat
+cat:
+ li a7, 9
+ ecall
+ ret
+.global fs_remove
+fs_remove:
+ li a7, 10
+ ecall
+ ret

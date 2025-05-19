@@ -1,5 +1,5 @@
 #include "os.h"
-
+#include "file.h"
 /*
  * Following functions SHOULD be called ONLY ONE time here,
  * so just declared here ONCE and NOT included in file os.h.
@@ -14,6 +14,7 @@ extern void plic_init(void);
 extern void timer_init(void);
 
 extern uint8_t __user_elf_start[];
+struct filesystem fs;
 
 void uart_put_hex(uint32_t num) {
     char hex_chars[] = "0123456789abcdef";
@@ -39,6 +40,8 @@ void start_kernel(void)
 	timer_init();
 
 	sched_init();
+
+	fs_init(&fs);
 	
 	uart_puts("ELF magic check: ");
     uart_put_hex(__user_elf_start[0]); uart_puts(" ");

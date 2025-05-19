@@ -12,7 +12,10 @@ sub entry {
         'shm_get'     => 4,
         'P'           => 5,
         'V'           => 6,
-        'get_tick'    => 7
+        'get_tick'    => 7,
+        'fs_create'   => 8,
+        'cat'      => 9,
+        'fs_remove'   => 10
     );
     print ".global $name\n";
     print "${name}:\n";
@@ -28,3 +31,6 @@ entry("shm_get");
 entry("P");
 entry("V");
 entry("get_tick");
+entry("fs_create");
+entry("cat");
+entry("fs_remove");

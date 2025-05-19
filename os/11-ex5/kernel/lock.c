@@ -7,9 +7,9 @@ int spin_lock(volatile int *lock) {
     do {
         // amoswap.w 原子交换操作
         asm volatile (
-            "amoswap.w %0, %1, (%2)"
-            : "=r"(ret)
-            : "r"(1), "r"(lock)
+            "amoswap.w %0, %1, (%2)"// amoswap.w 原子地将 lock 指向的内存值与寄存器中的值 1 交换。
+            : "=r"(ret)  // 输出：ret 保存内存中的旧值
+            : "r"(1), "r"(lock)  // 输入：向内存写入 1，操作地址为 lock
             : "memory"
         );
     } while (ret != 0); // 如果返回1，说明锁已被占用

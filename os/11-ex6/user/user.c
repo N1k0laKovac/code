@@ -26,7 +26,7 @@ void task_delay(volatile int count)
 // int get_tick() {
 //     return syscall(SYS_GET_TICK, 0, 0, 0);
 // }
-// �û�����ʾ��
+// 用户任务示例
 void user_task0(void) {
     char *shm = (char*)shm_get();
     while(1) {
@@ -49,7 +49,7 @@ void strcpy_custom(char *dest, const char *src) {
 }
 
 void strcat_custom(char *dest, const char *src) {
-    while (*dest) dest++;  // �ҵ� dest ��ĩβ
+    while (*dest) dest++;  // 找到 dest 的末尾
     while (*src) *dest++ = *src++;
     *dest = '\0';
 }
@@ -69,7 +69,7 @@ void itoa(int num, char *str) {
         str[i++] = '-';
     }
     str[i] = '\0';
-    // ��ת�ַ���
+    // 反转字符串
     for (int j = 0; j < i/2; j++) {
         char temp = str[j];
         str[j] = str[i-j-1];
@@ -115,7 +115,12 @@ void user_task1(void) {
 // 	// task_create(user_task1);
 // }
 
-
+// 自定义 strlen 实现（禁用标准库）
+size_t strlen_custom(const char *str) {
+    size_t len = 0;
+    while (str[len] != '\0') len++;
+    return len;
+}
 
 
 int main() {
@@ -123,9 +128,30 @@ int main() {
 	// task_create(call_MyPrintf);
 	// task_create(test);
 	task_create(MyPrintf("qq\n"));
-	task_create(user_task0);
-	task_create(user_task1);
-    uart_puts("Hello from main!\n");
+	// task_create(user_task0);
+	// task_create(user_task1);
+
+const char *content = "Hello, RVOS filesystem!";   
+const char *content1 = "终于结束了!";  
+// 创建文件
+ 
+    fs_create( "test.txt", content, strlen_custom(content));
+
+    uart_puts("\n");
+
+    // 删除文件
+    fs_remove("test.txt");
+
+    // 读取文件
+    cat( "test.txt"); // 预期输出: Hello, RVOS!
+
+    
+
+    fs_create( "test1.txt", content1, strlen_custom(content1));
+
+    cat( "test1.txt"); 
+
+    uart_puts("\n Hello from main!\n");
 	// MyPrintf("qq");
     exit(0);
 }

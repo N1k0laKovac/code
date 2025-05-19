@@ -6,3 +6,6 @@
 #define SYS_P  5
 #define SYS_V  6
 #define SYS_GET_TICK  7  
+#define SYS_FS_CREATE 8
+#define SYS_FS_CAT    9
+#define SYS_FS_REMOVE 10

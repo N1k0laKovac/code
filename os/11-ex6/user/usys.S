@@ -36,3 +36,21 @@ get_tick:
     ecall
     ret
 
+.global fs_create
+fs_create:
+    li a7, SYS_FS_CREATE # 解析为8
+    ecall
+    ret
+
+.global cat
+cat:
+    li a7, SYS_FS_CAT # 解析为9
+    ecall
+    ret
+
+.global fs_remove
+fs_remove:
+    li a7, SYS_FS_REMOVE # 解析为10
+    ecall
+    ret
+

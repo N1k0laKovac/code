@@ -11,22 +11,7 @@ void task_delay(volatile int count)
 	while (count--);
 }
 
-// int shm_get() {
-//     return syscall(SYS_SHM_GET, 0, 0, 0);
-// }
 
-// void P() {
-//     syscall(SYS_P, 0, 0, 0);
-// }
-
-// void V() {
-//     syscall(SYS_V, 0, 0, 0);
-// }
-
-// int get_tick() {
-//     return syscall(SYS_GET_TICK, 0, 0, 0);
-// }
-// 用户任务示例
 void user_task0(void) {
     char *shm = (char*)shm_get();
     while(1) {

@@ -1,6 +1,7 @@
 #include "os.h"
 #include "syscall.h"
 
+extern struct filesystem fs;
 
 char shared_mem[SHARED_MEM_SIZE];
 volatile int shared_lock = 0;
@@ -159,6 +160,33 @@ int sys_get_tick() {
     return get_current_tick(); // 调用 timer.c 的接口
 }
 
+//文件系统实现
+int sys_fs_create(const char *name, const char *data, size_t size) {
+    // 手动分配内存（禁用标准库需自行实现内存管理）
+    char *kernel_data = (char *)malloc(size);
+    if (!kernel_data) return -1;
+
+    // 复制数据到内核空间
+    for (size_t i = 0; i < size; i++) {
+        kernel_data[i] = data[i];
+    }
+
+    // 调用文件系统创建函数
+    int ret = fs_create(&fs, name, kernel_data, size);
+
+    // 释放内存（需实现自定义的 free）
+    free(kernel_data);
+    return ret;
+}
+
+int sys_fs_cat(const char *name) {
+    return fs_cat(&fs, name);
+}
+
+int sys_fs_remove(const char *name) {
+    return fs_remove(&fs, name);
+}
+
 
 
 void do_syscall(struct context *cxt)
@@ -190,6 +218,23 @@ void do_syscall(struct context *cxt)
 	case SYS_GET_TICK:
         cxt->a0 = sys_get_tick();
         break;
+	case SYS_FS_CREATE: {
+            const char *name = (const char *)cxt->a0;
+            const char *data = (const char *)cxt->a1;
+            size_t size = (size_t)cxt->a2;
+            cxt->a0 = sys_fs_create(name, data, size);
+            break;
+        }
+        case SYS_FS_CAT: {
+            const char *name = (const char *)cxt->a0;
+            cxt->a0 = sys_fs_cat(name);
+            break;
+        }
+        case SYS_FS_REMOVE: {
+            const char *name = (const char *)cxt->a0;
+            cxt->a0 = sys_fs_remove(name);
+            break;
+        }
 	default:
 		printf("Unknown syscall no: %d\n", syscall_num);
 		cxt->a0 = -1;

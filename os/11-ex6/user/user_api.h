@@ -9,5 +9,7 @@ extern int shm_get();
 extern void P();
 extern void V();
 extern int get_tick();
-
+extern int fs_create(const char *name, const char *data, size_t size);
+extern int cat(const char *name);
+extern int fs_remove(const char *name);
 #endif
